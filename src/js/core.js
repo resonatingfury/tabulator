@@ -47,12 +47,16 @@ Tabulator.prototype.defaultOptions = {
 
 	data:[], //default starting data
 
+	nestedFieldSeparator:".", //seperatpr for nested data
+
 	tooltips: false, //Tool tip value
 	tooltipsHeader: false, //Tool tip for headers
 	tooltipGenerationMode:"load", //when to generate tooltips
 
 	initialSort:false, //initial sorting criteria
 	initialFilter:false, //initial filtering criteria
+
+	sortOrderReverse:false, //reverse internal sort ordering
 
 	footerElement:false, //hold footer element
 
@@ -75,6 +79,22 @@ Tabulator.prototype.defaultOptions = {
 	downloadDataFormatter:false, //function to manipulate table data before it is downloaded
 	downloadReady:function(data, blob){return blob;}, //function to manipulate download data
 	downloadComplete:false, //function to manipulate download data
+	downloadConfig:{	//download config
+		columnGroups:false,
+		rowGroups:false,
+		columnCalcs:false,
+	},
+
+	dataTree:false, //enable data tree
+	dataTreeBranchElement: true, //show data tree branch element
+	dataTreeChildIndent:9, //data tree child indent in px
+	dataTreeChildField:"_children", //data tre column field to look for child rows
+	dataTreeCollapseElement:false, //data tree row collapse element
+	dataTreeExpandElement:false, //data tree row expand element
+	dataTreeStartExpanded:false,
+	dataTreeRowExpanded:function(){}, //row has been expanded
+	dataTreeRowCollapsed:function(){}, //row has been collapsed
+
 
 	addRowPos:"bottom", //position to insert blank rows, top|bottom
 
@@ -127,6 +147,7 @@ Tabulator.prototype.defaultOptions = {
 
 	groupBy:false, //enable table grouping and set field to group by
 	groupStartOpen:true, //starting state of group
+	groupValues:false,
 
 	groupHeader:false, //header generation function
 
@@ -387,6 +408,9 @@ Tabulator.prototype._buildElement = function(){
 		this.footerManager.activate();
 	}
 
+	if(options.dataTree && this.modExists("dataTree", true)){
+		mod.dataTree.initialize();
+	}
 
 	if( (options.persistentLayout || options.persistentSort || options.persistentFilter) && this.modExists("persistence", true)){
 		mod.persistence.initialize(options.persistenceMode, options.persistenceID);
@@ -1357,7 +1381,7 @@ Tabulator.prototype.setGroupHeader = function(values){
 
 Tabulator.prototype.getGroups = function(values){
 	if(this.modExists("groupRows", true)){
-		return this.modules.groupRows.getGroups();
+		return this.modules.groupRows.getGroups(true);
 	}else{
 		return false;
 	}
